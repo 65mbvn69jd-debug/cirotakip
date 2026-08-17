@@ -4261,6 +4261,118 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
+</script><script>
+window.addEventListener("load", function () {
+
+    if (!window.supabase || typeof cloud === "undefined") return;
+
+    const panel = document.createElement("div");
+
+    panel.id = "accountPanel";
+
+    panel.style.cssText = `
+        position:fixed;
+        top:10px;
+        right:10px;
+        z-index:9998;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        background:white;
+        padding:8px 10px;
+        border-radius:12px;
+        box-shadow:0 3px 15px rgba(0,0,0,.15);
+        font-size:12px;
+    `;
+
+    panel.innerHTML = `
+        <span id="accountEmail">☁️ Hesap</span>
+
+        <button
+            id="syncNowButton"
+            style="
+                border:0;
+                background:#2563eb;
+                color:white;
+                padding:7px 10px;
+                border-radius:8px;
+                cursor:pointer;
+            ">
+            🔄 Senkronize
+        </button>
+
+        <button
+            id="logoutButton"
+            style="
+                border:0;
+                background:#dc2626;
+                color:white;
+                padding:7px 10px;
+                border-radius:8px;
+                cursor:pointer;
+            ">
+            🚪 Çıkış
+        </button>
+    `;
+
+    document.body.appendChild(panel);
+
+    cloud.auth.getUser().then(function(result) {
+
+        if (result.data && result.data.user) {
+            document.getElementById("accountEmail").textContent =
+                "☁️ " + result.data.user.email;
+        }
+
+    });
+
+    document.getElementById("logoutButton").onclick = async function () {
+
+        if (!confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+            return;
+        }
+
+        await cloud.auth.signOut();
+
+        localStorage.removeItem("ISLETME_CIRO_DATA");
+        localStorage.removeItem("ISLETME_PERSONEL_DATA");
+        localStorage.removeItem("ISLETME_PUANTAJ_DATA");
+
+        location.reload();
+
+    };
+
+    document.getElementById("syncNowButton").onclick = async function () {
+
+        const button = document.getElementById("syncNowButton");
+
+        button.textContent = "⏳ Bekleyin...";
+        button.disabled = true;
+
+        try {
+
+            if (typeof initialCloudSync === "function") {
+                await initialCloudSync();
+            }
+
+            button.textContent = "✅ Senkronize";
+
+        } catch (error) {
+
+            console.error(error);
+
+            button.textContent = "❌ Hata";
+
+        }
+
+        setTimeout(function () {
+            button.textContent = "🔄 Senkronize";
+            button.disabled = false;
+        }, 2000);
+
+    };
+
+});
 </script>
 </body>
 </html>
