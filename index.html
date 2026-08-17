@@ -644,6 +644,8 @@ input,select,textarea{font-size:16px;min-height:44px;}
 
 </style>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -3965,6 +3967,293 @@ return String(value ?? "")
 
 </script>
 
+
+<script>
+/* =====================================================
+   BULUT SENKRONIZASYONU - SUPABASE
+===================================================== */
+
+const SUPABASE_URL = "https://yzzoiuwlcccvezgqdetg.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HHo8C9Hi91DgTiRPDK-ZhA_Ac88ijz5";
+
+const cloud = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+let cloudUser = null;
+let cloudBusy = false;
+
+function isUUID(value){
+  return typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function ensureUUID(value){
+  return isUUID(value) ? value : crypto.randomUUID();
+}
+
+function saveLocalAll(){
+  localStorage.setItem("ISLETME_CIRO_DATA", JSON.stringify(records));
+  localStorage.setItem("ISLETME_PERSONEL_DATA", JSON.stringify(personnel));
+  localStorage.setItem("ISLETME_PUANTAJ_DATA", JSON.stringify(attendance));
+}
+
+function cloudMessage(text){
+  const el=document.getElementById("cloudStatus");
+  if(el) el.textContent=text;
+}
+
+function addCloudUI(){
+  if(document.getElementById("cloudLoginBox")) return;
+
+  const style=document.createElement("style");
+  style.textContent=`
+    #cloudLoginBox{position:fixed;inset:0;background:rgba(15,23,42,.62);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}
+    #cloudLoginCard{width:min(430px,100%);background:white;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    #cloudLoginCard h2{margin:0 0 8px;color:#172033}
+    #cloudLoginCard p{color:#64748b;font-size:14px;line-height:1.5}
+    #cloudLoginCard input{margin:6px 0}
+    #cloudLoginCard button{width:100%;margin-top:8px}
+    #cloudLoginMessage{min-height:22px;margin-top:10px;font-size:13px;color:#b91c1c}
+    #cloudStatus{position:fixed;right:10px;bottom:10px;z-index:1000;background:#0f172a;color:white;padding:7px 11px;border-radius:20px;font-size:11px;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+  `;
+  document.head.appendChild(style);
+
+  const box=document.createElement("div");
+  box.id="cloudLoginBox";
+  box.innerHTML=`
+    <div id="cloudLoginCard">
+      <h2>☁️ Ciro Takip Girişi</h2>
+      <p>Telefon ve bilgisayardaki verilerin aynı olması için hesabınla giriş yap.</p>
+      <input id="cloudEmail" type="email" placeholder="E-posta adresi" autocomplete="email">
+      <input id="cloudPassword" type="password" placeholder="Şifre" autocomplete="current-password">
+      <button id="cloudLoginBtn" class="btn-blue">Giriş Yap</button>
+      <button id="cloudSignupBtn" class="btn-green">Yeni Hesap Oluştur</button>
+      <div id="cloudLoginMessage"></div>
+    </div>`;
+  document.body.appendChild(box);
+
+  const status=document.createElement("div");
+  status.id="cloudStatus";
+  status.textContent="☁️ Giriş bekleniyor";
+  document.body.appendChild(status);
+
+  document.getElementById("cloudLoginBtn").onclick=cloudLogin;
+  document.getElementById("cloudSignupBtn").onclick=cloudSignup;
+}
+
+function loginMessage(text,ok=false){
+  const el=document.getElementById("cloudLoginMessage");
+  if(!el) return;
+  el.style.color=ok ? "#166534" : "#b91c1c";
+  el.textContent=text;
+}
+
+async function cloudLogin(){
+  const email=document.getElementById("cloudEmail").value.trim();
+  const password=document.getElementById("cloudPassword").value;
+  if(!email || !password){ loginMessage("E-posta ve şifre gerekli."); return; }
+  loginMessage("Giriş yapılıyor...",true);
+  const {data,error}=await cloud.auth.signInWithPassword({email,password});
+  if(error){ loginMessage(error.message); return; }
+  cloudUser=data.user;
+  await finishCloudLogin();
+}
+
+async function cloudSignup(){
+  const email=document.getElementById("cloudEmail").value.trim();
+  const password=document.getElementById("cloudPassword").value;
+  if(!email || !password){ loginMessage("E-posta ve şifre gerekli."); return; }
+  if(password.length<6){ loginMessage("Şifre en az 6 karakter olmalı."); return; }
+  loginMessage("Hesap oluşturuluyor...",true);
+  const {data,error}=await cloud.auth.signUp({email,password});
+  if(error){ loginMessage(error.message); return; }
+  if(data.session){
+    cloudUser=data.user;
+    await finishCloudLogin();
+  }else{
+    loginMessage("Hesap oluşturuldu. E-posta adresine gelen doğrulama bağlantısını onayla, sonra Giriş Yap.",true);
+  }
+}
+
+async function finishCloudLogin(){
+  const box=document.getElementById("cloudLoginBox");
+  if(box) box.remove();
+  cloudMessage("☁️ Veriler eşleştiriliyor...");
+  await initialCloudSync();
+  cloudMessage("☁️ Senkronize");
+}
+
+async function initialCloudSync(){
+  if(!cloudUser || cloudBusy) return;
+  cloudBusy=true;
+  try{
+    const [c,p,a]=await Promise.all([
+      cloud.from("ciro").select("*").order("tarih",{ascending:false}),
+      cloud.from("personel").select("*").order("created_at",{ascending:true}),
+      cloud.from("puantaj").select("*").order("tarih",{ascending:true})
+    ]);
+    if(c.error) throw c.error;
+    if(p.error) throw p.error;
+    if(a.error) throw a.error;
+
+    const localHasCiro=records.length>0;
+    const localHasPersonel=personnel.length>0;
+    const localHasAttendance=Object.keys(attendance).length>0;
+
+    if((c.data||[]).length===0 && localHasCiro){
+      await syncCiroToCloud();
+    }else{
+      records=(c.data||[]).map(r=>({
+        id:r.id,date:r.tarih,cash:Number(r.nakit)||0,card:Number(r.kart)||0,
+        expense:Number(r.gider)||0,expenseDescription:r.gider_aciklama||"",description:r.aciklama||""
+      }));
+    }
+
+    let idMap={};
+    if((p.data||[]).length===0 && localHasPersonel){
+      const old=personnel.map(x=>({...x}));
+      personnel=old.map(x=>({...x,id:ensureUUID(x.id)}));
+      old.forEach((x,i)=>{ idMap[String(x.id)]=personnel[i].id; });
+      await syncPersonnelToCloud();
+      if(localHasAttendance){
+        const migrated={};
+        Object.entries(attendance).forEach(([key,status])=>{
+          const first=key.split("_")[0];
+          const newId=idMap[first] || first;
+          migrated[key.replace(first+"_",newId+"_")]=status;
+        });
+        attendance=migrated;
+        await syncAttendanceToCloud();
+      }
+    }else{
+      personnel=(p.data||[]).map(x=>({id:x.id,name:x.ad_soyad,role:x.gorev||"",startDate:x.baslangic_tarihi||"",active:!!x.aktif}));
+      attendance={};
+      (a.data||[]).forEach(r=>{
+        const d=new Date(r.tarih+"T00:00:00");
+        const month=r.tarih.substring(0,7);
+        const day=d.getDate();
+        attendance[attendanceKey(r.personel_id,month,day)]=r.durum;
+      });
+    }
+
+    saveLocalAll();
+    render();
+    renderPersonnel();
+    populateAttendancePeople();
+    renderAttendance();
+    renderPersonnelReport();
+    updateBackupInfo();
+  }catch(e){
+    console.error(e);
+    cloudMessage("☁️ Senkronizasyon hatası");
+    alert("Bulut senkronizasyonu sırasında hata oluştu: "+(e.message||e));
+  }finally{
+    cloudBusy=false;
+  }
+}
+
+async function syncCiroToCloud(){
+  if(!cloudUser) return;
+  records=records.map(r=>({...r,id:ensureUUID(r.id)}));
+  const rows=records.map(r=>({
+    id:r.id,user_id:cloudUser.id,tarih:r.date,nakit:Number(r.cash)||0,kart:Number(r.card)||0,
+    gider:Number(r.expense)||0,gider_aciklama:r.expenseDescription||"",aciklama:r.description||""
+  }));
+  const {data,error}=await cloud.from("ciro").upsert(rows,{onConflict:"id"}).select();
+  if(error) throw error;
+  const keep=new Set(records.map(r=>r.id));
+  const {data:remote,error:re}=await cloud.from("ciro").select("id").eq("user_id",cloudUser.id);
+  if(re) throw re;
+  const remove=(remote||[]).map(x=>x.id).filter(id=>!keep.has(id));
+  if(remove.length) { const {error:de}=await cloud.from("ciro").delete().in("id",remove); if(de) throw de; }
+  if(data) records=data.map(r=>({id:r.id,date:r.tarih,cash:Number(r.nakit)||0,card:Number(r.kart)||0,expense:Number(r.gider)||0,expenseDescription:r.gider_aciklama||"",description:r.aciklama||""}));
+  localStorage.setItem("ISLETME_CIRO_DATA",JSON.stringify(records));
+}
+
+async function syncPersonnelToCloud(){
+  if(!cloudUser) return;
+  personnel=personnel.map(p=>({...p,id:ensureUUID(p.id)}));
+  const rows=personnel.map(p=>({
+    id:p.id,user_id:cloudUser.id,ad_soyad:p.name,gorev:p.role||"",baslangic_tarihi:p.startDate||null,aktif:!!p.active
+  }));
+  const {data,error}=await cloud.from("personel").upsert(rows,{onConflict:"id"}).select();
+  if(error) throw error;
+  const keep=new Set(personnel.map(p=>p.id));
+  const {data:remote,error:re}=await cloud.from("personel").select("id").eq("user_id",cloudUser.id);
+  if(re) throw re;
+  const remove=(remote||[]).map(x=>x.id).filter(id=>!keep.has(id));
+  if(remove.length){ const {error:de}=await cloud.from("personel").delete().in("id",remove); if(de) throw de; }
+  if(data) personnel=data.map(p=>({id:p.id,name:p.ad_soyad,role:p.gorev||"",startDate:p.baslangic_tarihi||"",active:!!p.aktif}));
+  localStorage.setItem("ISLETME_PERSONEL_DATA",JSON.stringify(personnel));
+}
+
+async function syncAttendanceToCloud(){
+  if(!cloudUser) return;
+  const rows=[];
+  Object.entries(attendance).forEach(([key,status])=>{
+    const parts=key.split("_");
+    if(parts.length<3 || !status) return;
+    const personId=parts[0], month=parts[1], day=parts[2];
+    rows.push({user_id:cloudUser.id,personel_id:personId,tarih:makeDate(month,day),durum:status});
+  });
+  const {data:remote,error:re}=await cloud.from("puantaj").select("id").eq("user_id",cloudUser.id);
+  if(re) throw re;
+  if((remote||[]).length){
+    const {error:de}=await cloud.from("puantaj").delete().eq("user_id",cloudUser.id);
+    if(de) throw de;
+  }
+  if(rows.length){ const {error}=await cloud.from("puantaj").insert(rows); if(error) throw error; }
+  localStorage.setItem("ISLETME_PUANTAJ_DATA",JSON.stringify(attendance));
+}
+
+const originalSaveCiroData=saveCiroData;
+const originalSavePersonnelData=savePersonnelData;
+const originalSaveAttendanceData=saveAttendanceData;
+
+saveCiroData=function(){
+  originalSaveCiroData();
+  if(cloudUser && !cloudBusy){
+    syncCiroToCloud().then(()=>cloudMessage("☁️ Senkronize")).catch(e=>{console.error(e);cloudMessage("☁️ Senkronizasyon hatası");});
+  }
+};
+
+savePersonnelData=function(){
+  originalSavePersonnelData();
+  if(cloudUser && !cloudBusy){
+    (async()=>{
+      try{
+        await syncPersonnelToCloud();
+        await syncAttendanceToCloud();
+        cloudMessage("☁️ Senkronize");
+      }catch(e){console.error(e);cloudMessage("☁️ Senkronizasyon hatası");}
+    })();
+  }
+};
+
+saveAttendanceData=function(){
+  originalSaveAttendanceData();
+  if(cloudUser && !cloudBusy){
+    syncAttendanceToCloud().then(()=>cloudMessage("☁️ Senkronize")).catch(e=>{console.error(e);cloudMessage("☁️ Senkronizasyon hatası");});
+  }
+};
+
+window.addEventListener("load",async()=>{
+  addCloudUI();
+  const {data}=await cloud.auth.getSession();
+  if(data.session){
+    cloudUser=data.session.user;
+    await finishCloudLogin();
+  }
+  cloud.auth.onAuthStateChange((_event,session)=>{
+    if(session && !cloudUser){
+      cloudUser=session.user;
+      finishCloudLogin();
+    }
+  });
+});
+</script>
 
 <script>
 if ('serviceWorker' in navigator) {
