@@ -1,0 +1,3977 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>İşletme Ciro & Personel Takip</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ciro Takip">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#eef2f7;
+    color:#172033;
+}
+
+header{
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    color:white;
+    padding:20px;
+}
+
+.header-inner{
+    max-width:1500px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.logo{
+    font-size:26px;
+    font-weight:bold;
+}
+
+.subtitle{
+    opacity:.85;
+    margin-top:5px;
+}
+
+.container{
+    max-width:1500px;
+    margin:auto;
+    padding:20px;
+}
+
+/* ANA MENÜ */
+
+.main-menu{
+    background:white;
+    border-bottom:1px solid #dbe2ea;
+    padding:10px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.menu-inner{
+    max-width:1500px;
+    margin:auto;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.menu-btn{
+    background:#e2e8f0;
+    color:#334155;
+    padding:12px 18px;
+}
+
+.menu-btn.active{
+    background:#2563eb;
+    color:white;
+}
+
+/* BÖLÜMLER */
+
+.section{
+    display:none;
+}
+
+.section.active{
+    display:block;
+}
+
+/* KARTLAR */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+}
+
+.card-title{
+    color:#64748b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.card-value{
+    font-size:25px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.cash{
+    color:#16a34a;
+}
+
+.card-payment{
+    color:#2563eb;
+}
+
+.turnover{
+    color:#7c3aed;
+}
+
+.expense{
+    color:#dc2626;
+}
+
+.net{
+    color:#0891b2;
+}
+
+.people{
+    color:#7c3aed;
+}
+
+/* PANELLER */
+
+.panel{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 3px 15px rgba(0,0,0,.07);
+}
+
+.panel h2{
+    margin-top:0;
+}
+
+/* FORM */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.form-group label{
+    font-size:13px;
+    font-weight:bold;
+    color:#475569;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:7px;
+    font-size:14px;
+    outline:none;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#2563eb;
+}
+
+.buttons{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+
+button{
+    border:0;
+    border-radius:7px;
+    padding:11px 16px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.btn-blue{
+    background:#2563eb;
+    color:white;
+}
+
+.btn-green{
+    background:#16a34a;
+    color:white;
+}
+
+.btn-red{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-gray{
+    background:#64748b;
+    color:white;
+}
+
+.btn-orange{
+    background:#ea580c;
+    color:white;
+}
+
+.btn-purple{
+    background:#7c3aed;
+    color:white;
+}
+
+/* FİLTRE */
+
+.filter-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+/* TABLO */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f1f5f9;
+    padding:12px;
+    text-align:left;
+    font-size:13px;
+    white-space:nowrap;
+}
+
+td{
+    padding:11px;
+    border-bottom:1px solid #e2e8f0;
+    font-size:13px;
+}
+
+tr:hover td{
+    background:#f8fafc;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.badge-cash{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-card{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-expense{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+/* RAPOR */
+
+.report-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.report-box{
+    background:#f8fafc;
+    border-radius:10px;
+    padding:15px;
+}
+
+.report-row{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.report-row:last-child{
+    border-bottom:0;
+    font-weight:bold;
+}
+
+/* PERSONEL KARTLARI */
+
+.personnel-cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.person-card{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 3px 15px rgba(0,0,0,.07);
+}
+
+.person-name{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.person-role{
+    color:#64748b;
+    margin-top:5px;
+}
+
+.person-status{
+    margin-top:12px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* PUANTAJ */
+
+.attendance-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
+
+.attendance-table{
+    min-width:1100px;
+}
+
+.attendance-table th,
+.attendance-table td{
+    text-align:center;
+    min-width:70px;
+}
+
+.attendance-table th:first-child,
+.attendance-table td:first-child{
+    position:sticky;
+    left:0;
+    z-index:5;
+    background:white;
+    min-width:180px;
+    text-align:left;
+}
+
+.attendance-table th:first-child{
+    background:#f1f5f9;
+}
+
+.day-button{
+    width:58px;
+    min-height:42px;
+    padding:7px 3px;
+    font-size:11px;
+    border-radius:7px;
+}
+
+.status-work{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-leave{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.status-report{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.status-absent{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.status-empty{
+    background:#f1f5f9;
+    color:#64748b;
+}
+
+.weekend{
+    background:#fff7ed!important;
+}
+
+.legend{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+
+.legend-item{
+    padding:7px 10px;
+    border-radius:7px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* RAPOR PERSONEL */
+
+.summary-cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.summary-mini{
+    background:#f8fafc;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.summary-mini strong{
+    display:block;
+    font-size:24px;
+    margin-top:6px;
+}
+
+/* UYARI */
+
+.info-box{
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1e40af;
+    padding:14px;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+
+.warning-box{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#9a3412;
+    padding:14px;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+
+/* BOŞ */
+
+.empty{
+    text-align:center;
+    color:#64748b;
+    padding:30px;
+}
+
+/* PRINT */
+
+@media print{
+
+body{
+    background:white;
+}
+
+header{
+    background:white;
+    color:black;
+    border-bottom:2px solid #000;
+}
+
+.no-print{
+    display:none!important;
+}
+
+.container{
+    padding:0;
+}
+
+.panel,
+.card,
+.person-card{
+    box-shadow:none;
+    border:1px solid #ddd;
+}
+
+.main-menu{
+    display:none;
+}
+
+.section{
+    display:none!important;
+}
+
+.section.print-active{
+    display:block!important;
+}
+
+.cards{
+    grid-template-columns:repeat(5,1fr);
+}
+
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+
+.cards{
+    grid-template-columns:repeat(3,1fr);
+}
+
+.personnel-cards{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.form-grid,
+.filter-grid{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.summary-cards{
+    grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:700px){
+
+.header-inner{
+    display:block;
+}
+
+.cards{
+    grid-template-columns:1fr 1fr;
+}
+
+.form-grid,
+.filter-grid,
+.report-grid{
+    grid-template-columns:1fr;
+}
+
+.personnel-cards,
+.summary-cards{
+    grid-template-columns:1fr;
+}
+
+.container{
+    padding:10px;
+}
+
+.menu-inner{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+}
+
+}
+
+
+/* MOBİL / TELEFON İYİLEŞTİRMELERİ */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{-webkit-tap-highlight-color:transparent;}
+button,input,select,textarea{font-family:inherit;}
+button{min-height:44px;touch-action:manipulation;}
+input,select,textarea{font-size:16px;min-height:44px;}
+.menu-btn{min-height:44px;white-space:nowrap;}
+.table-wrapper{-webkit-overflow-scrolling:touch;}
+@media(max-width:700px){
+  header{padding:14px 12px;position:relative;}
+  .logo{font-size:20px;line-height:1.25;}
+  .subtitle{font-size:12px;line-height:1.4;}
+  .main-menu{padding:8px;overflow-x:auto;}
+  .menu-inner{display:flex;flex-wrap:nowrap;gap:7px;min-width:max-content;}
+  .menu-btn{padding:10px 13px;font-size:13px;}
+  .container{padding:8px;}
+  .panel{padding:14px;margin-bottom:12px;border-radius:10px;}
+  .card{padding:14px;}
+  .card-value{font-size:20px;}
+  .cards{gap:8px;}
+  .form-grid,.filter-grid{gap:9px;}
+  .buttons{gap:7px;}
+  .buttons button{flex:1 1 auto;}
+  th,td{padding:9px 8px;font-size:12px;}
+  .attendance-table{min-width:980px;}
+  .attendance-table th:first-child,.attendance-table td:first-child{min-width:140px;}
+  .day-button{width:52px;min-height:44px;}
+}
+@media(max-width:420px){
+  .cards{grid-template-columns:1fr 1fr;}
+  .card-title{font-size:11px;}
+  .card-value{font-size:18px;}
+  .menu-btn{font-size:12px;padding:9px 11px;}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="header-inner">
+
+<div>
+
+<div class="logo">
+📊 İŞLETME CİRO & PERSONEL TAKİP
+</div>
+
+<div class="subtitle">
+Ciro • Gider • Personel • Puantaj • Aylık Rapor
+</div>
+
+</div>
+
+<div class="no-print">
+
+<button
+class="btn-gray"
+onclick="printCurrentSection()">
+🖨️ YAZDIR
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<!-- ANA MENÜ -->
+
+<div class="main-menu no-print">
+
+<div class="menu-inner">
+
+<button
+class="menu-btn active"
+onclick="showSection('ciroSection',this)">
+📊 CİRO
+</button>
+
+<button
+class="menu-btn"
+onclick="showSection('personelSection',this)">
+👥 PERSONELLER
+</button>
+
+<button
+class="menu-btn"
+onclick="showSection('puantajSection',this)">
+📅 PUANTAJ
+</button>
+
+<button
+class="menu-btn"
+onclick="showSection('personelRaporSection',this)">
+📈 PERSONEL RAPORU
+</button>
+
+<button
+class="menu-btn"
+onclick="showSection('yedekSection',this)">
+💾 YEDEKLEME
+</button>
+
+</div>
+
+</div>
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     CİRO
+===================================================== -->
+
+<div
+id="ciroSection"
+class="section active">
+
+
+<div class="cards">
+
+<div class="card">
+
+<div class="card-title">
+AYLIK NAKİT
+</div>
+
+<div
+id="monthlyCash"
+class="card-value cash">
+0,00 ₺
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+AYLIK KREDİ KARTI
+</div>
+
+<div
+id="monthlyCard"
+class="card-value card-payment">
+0,00 ₺
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+TOPLAM CİRO
+</div>
+
+<div
+id="monthlyTurnover"
+class="card-value turnover">
+0,00 ₺
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+TOPLAM GİDER
+</div>
+
+<div
+id="monthlyExpense"
+class="card-value expense">
+0,00 ₺
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+NET KALAN
+</div>
+
+<div
+id="monthlyNet"
+class="card-value net">
+0,00 ₺
+</div>
+
+</div>
+
+</div>
+
+
+<!-- KAYIT EKLE -->
+
+<div class="panel no-print">
+
+<h2>➕ Yeni Günlük Kayıt</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Tarih</label>
+
+<input
+type="date"
+id="date">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Nakit Ciro</label>
+
+<input
+type="number"
+step="0.01"
+id="cash"
+placeholder="0,00">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Kredi Kartı Ciro</label>
+
+<input
+type="number"
+step="0.01"
+id="card"
+placeholder="0,00">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Gider</label>
+
+<input
+type="number"
+step="0.01"
+id="expense"
+placeholder="0,00">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Gider Açıklaması</label>
+
+<input
+type="text"
+id="expenseDescription"
+placeholder="Örn: Elektrik, kira...">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Açıklama</label>
+
+<input
+type="text"
+id="description"
+placeholder="Günlük açıklama">
+
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button
+class="btn-green"
+onclick="saveRecord()">
+💾 KAYDET
+</button>
+
+<button
+class="btn-gray"
+onclick="clearForm()">
+TEMİZLE
+</button>
+
+</div>
+
+</div>
+
+
+<!-- FİLTRE -->
+
+<div class="panel no-print">
+
+<h2>🔎 Filtreleme</h2>
+
+<div class="filter-grid">
+
+<div class="form-group">
+
+<label>Ay</label>
+
+<input
+type="month"
+id="filterMonth"
+onchange="render()">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Başlangıç Tarihi</label>
+
+<input
+type="date"
+id="filterStart"
+onchange="render()">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Bitiş Tarihi</label>
+
+<input
+type="date"
+id="filterEnd"
+onchange="render()">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Ödeme Türü</label>
+
+<select
+id="filterPayment"
+onchange="render()">
+
+<option value="all">Tümü</option>
+<option value="cash">Nakit</option>
+<option value="card">Kredi Kartı</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button
+class="btn-gray"
+onclick="clearFilters()">
+FİLTREYİ TEMİZLE
+</button>
+
+<button
+class="btn-blue"
+onclick="exportCSV()">
+📥 CSV / EXCEL
+</button>
+
+<button
+class="btn-orange"
+onclick="printReport()">
+🖨️ RAPORU YAZDIR
+</button>
+
+</div>
+
+</div>
+
+
+<!-- TABLO -->
+
+<div class="panel">
+
+<h2>📋 Günlük Kayıtlar</h2>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Tarih</th>
+<th>Nakit</th>
+<th>Kredi Kartı</th>
+<th>Toplam Ciro</th>
+<th>Gider</th>
+<th>Net</th>
+<th>Gider Açıklaması</th>
+<th>Açıklama</th>
+<th class="no-print">İşlem</th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="recordsTable">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- RAPOR -->
+
+<div class="panel">
+
+<h2>📊 Dönem Özeti</h2>
+
+<div class="report-grid">
+
+<div class="report-box">
+
+<div class="report-row">
+<span>Nakit Toplamı</span>
+<strong id="reportCash">0,00 ₺</strong>
+</div>
+
+<div class="report-row">
+<span>Kredi Kartı Toplamı</span>
+<strong id="reportCard">0,00 ₺</strong>
+</div>
+
+<div class="report-row">
+<span>Toplam Ciro</span>
+<strong id="reportTurnover">0,00 ₺</strong>
+</div>
+
+</div>
+
+
+<div class="report-box">
+
+<div class="report-row">
+<span>Toplam Gider</span>
+<strong id="reportExpense">0,00 ₺</strong>
+</div>
+
+<div class="report-row">
+<span>Net Kalan</span>
+<strong id="reportNet">0,00 ₺</strong>
+</div>
+
+<div class="report-row">
+<span>Kayıt Sayısı</span>
+<strong id="reportCount">0</strong>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     PERSONELLER
+===================================================== -->
+
+<div
+id="personelSection"
+class="section">
+
+<div class="panel">
+
+<h2>👥 Personel Yönetimi</h2>
+
+<div class="info-box">
+Personelleri burada tanımlayın. Puantaj bölümünde bu personeller için aylık çalışma ve izin kayıtları tutulacaktır.
+</div>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Ad Soyad</label>
+
+<input
+type="text"
+id="personName"
+placeholder="Örn: Ahmet Yılmaz">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Görevi</label>
+
+<input
+type="text"
+id="personRole"
+placeholder="Örn: Garson">
+
+</div>
+
+
+<div class="form-group">
+
+<label>İşe Giriş Tarihi</label>
+
+<input
+type="date"
+id="personStartDate">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Durum</label>
+
+<select id="personActive">
+
+<option value="true">Aktif</option>
+<option value="false">Pasif</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button
+class="btn-green"
+onclick="savePerson()">
+👤 PERSONELİ KAYDET
+</button>
+
+<button
+class="btn-gray"
+onclick="clearPersonForm()">
+TEMİZLE
+</button>
+
+</div>
+
+</div>
+
+
+<div
+id="personnelCards"
+class="personnel-cards">
+</div>
+
+
+<div class="panel">
+
+<h2>📋 Personel Listesi</h2>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Ad Soyad</th>
+<th>Görevi</th>
+<th>İşe Giriş</th>
+<th>Durum</th>
+<th class="no-print">İşlem</th>
+
+</tr>
+
+</thead>
+
+<tbody id="personnelTable">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     PUANTAJ
+===================================================== -->
+
+<div
+id="puantajSection"
+class="section">
+
+<div class="panel">
+
+<h2>📅 Aylık Puantaj</h2>
+
+<div class="info-box">
+Saatlik takip yoktur. Sadece günlük durum tutulur. Bir ayı toplu olarak "Çalıştı" yapabilir, daha sonra izin/rapor/gelmedi günlerini değiştirebilirsiniz.
+</div>
+
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Ay</label>
+
+<input
+type="month"
+id="attendanceMonth"
+onchange="renderAttendance()">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Personel</label>
+
+<select
+id="attendancePerson"
+onchange="renderAttendance()">
+</select>
+
+</div>
+
+</div>
+
+
+<div class="buttons">
+
+<button
+class="btn-green"
+onclick="setAllAttendance('work')">
+🟢 TÜM AYI ÇALIŞTI YAP
+</button>
+
+<button
+class="btn-orange"
+onclick="setWeekends('leave')">
+🟠 HAFTA SONLARINI İZİN YAP
+</button>
+
+<button
+class="btn-blue"
+onclick="setAllAttendance('leave')">
+🏖️ TÜM AYI İZİN YAP
+</button>
+
+<button
+class="btn-gray"
+onclick="clearAttendanceMonth()">
+TEMİZLE
+</button>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<div
+class="attendance-header">
+
+<div>
+
+<h2 style="margin-bottom:5px">
+📋 Günlük Puantaj
+</h2>
+
+<div id="attendancePersonTitle"></div>
+
+</div>
+
+</div>
+
+
+<div class="table-wrapper">
+
+<table
+class="attendance-table">
+
+<thead id="attendanceHead">
+</thead>
+
+<tbody id="attendanceBody">
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="legend">
+
+<div class="legend-item status-work">
+🟢 Çalıştı
+</div>
+
+<div class="legend-item status-leave">
+🟠 İzin
+</div>
+
+<div class="legend-item status-report">
+🔵 Rapor
+</div>
+
+<div class="legend-item status-absent">
+🔴 Gelmedi
+</div>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<h2>📊 Seçili Personel Özeti</h2>
+
+<div
+id="attendanceSummary"
+class="summary-cards">
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     PERSONEL RAPORU
+===================================================== -->
+
+<div
+id="personelRaporSection"
+class="section">
+
+<div class="panel">
+
+<h2>📈 Personel Aylık Raporu</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>Rapor Ayı</label>
+
+<input
+type="month"
+id="reportMonth"
+onchange="renderPersonnelReport()">
+
+</div>
+
+</div>
+
+
+<div class="buttons no-print">
+
+<button
+class="btn-orange"
+onclick="printPersonnelReport()">
+🖨️ RAPORU YAZDIR
+</button>
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<h2 id="personnelReportTitle">
+Aylık Personel Raporu
+</h2>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Personel</th>
+<th>Görevi</th>
+<th>Çalıştı</th>
+<th>İzin</th>
+<th>Rapor</th>
+<th>Gelmedi</th>
+<th>Kayıtlı Gün</th>
+
+</tr>
+
+</thead>
+
+<tbody
+id="personnelReportTable">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     YEDEKLEME
+===================================================== -->
+
+<div
+id="yedekSection"
+class="section">
+
+<div class="panel">
+
+<h2>💾 Veri Güvenliği ve Yedekleme</h2>
+
+<div class="warning-box">
+
+<strong>ÖNEMLİ:</strong>
+Ciro, personel ve puantaj verileriniz bilgisayarınızdaki tarayıcıda saklanır.
+Düzenli olarak yedek almanız önerilir.
+
+</div>
+
+
+<div class="buttons">
+
+<button
+class="btn-green"
+onclick="backupAllData()">
+💾 YEDEK AL
+</button>
+
+
+<button
+class="btn-blue"
+onclick="document.getElementById('backupFile').click()">
+📂 YEDEKTEN GERİ YÜKLE
+</button>
+
+<input
+type="file"
+id="backupFile"
+accept=".json"
+style="display:none"
+onchange="restoreBackup(event)">
+
+</div>
+
+</div>
+
+
+<div class="panel">
+
+<h2>🔐 Mevcut Veri Durumu</h2>
+
+<div class="report-grid">
+
+<div class="report-box">
+
+<div class="report-row">
+<span>Ciro Kayıtları</span>
+<strong id="backupCiroCount">0</strong>
+</div>
+
+<div class="report-row">
+<span>Personel Sayısı</span>
+<strong id="backupPersonCount">0</strong>
+</div>
+
+</div>
+
+
+<div class="report-box">
+
+<div class="report-row">
+<span>Puantaj Kayıtları</span>
+<strong id="backupAttendanceCount">0</strong>
+</div>
+
+<div class="report-row">
+<span>Veri Durumu</span>
+<strong style="color:#16a34a">
+KORUNUYOR
+</strong>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   VERİLER
+   ÖNEMLİ:
+   CİRO VERİSİNE DOKUNULMUYOR
+===================================================== */
+
+let records =
+JSON.parse(
+localStorage.getItem(
+"ISLETME_CIRO_DATA"
+) || "[]"
+);
+
+
+/*
+   PERSONEL VERİLERİ AYRI
+*/
+
+let personnel =
+JSON.parse(
+localStorage.getItem(
+"ISLETME_PERSONEL_DATA"
+) || "[]"
+);
+
+
+/*
+   PUANTAJ VERİLERİ AYRI
+*/
+
+let attendance =
+JSON.parse(
+localStorage.getItem(
+"ISLETME_PUANTAJ_DATA"
+) || "{}"
+);
+
+
+let editingId = null;
+let editingPersonId = null;
+
+
+/* =====================================================
+   PARA
+===================================================== */
+
+function money(value){
+
+return Number(value || 0)
+.toLocaleString(
+"tr-TR",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+) + " ₺";
+
+}
+
+
+/* =====================================================
+   TARİH
+===================================================== */
+
+function today(){
+
+const d = new Date();
+
+const year = d.getFullYear();
+
+const month =
+String(
+d.getMonth()+1
+).padStart(2,"0");
+
+const day =
+String(
+d.getDate()
+).padStart(2,"0");
+
+return `${year}-${month}-${day}`;
+
+}
+
+
+/* =====================================================
+   BAŞLANGIÇ
+===================================================== */
+
+document.getElementById("date").value=today();
+
+document.getElementById("filterMonth").value=
+today().substring(0,7);
+
+document.getElementById("attendanceMonth").value=
+today().substring(0,7);
+
+document.getElementById("reportMonth").value=
+today().substring(0,7);
+
+document.getElementById("personStartDate").value=today();
+
+render();
+
+renderPersonnel();
+
+populateAttendancePeople();
+
+renderAttendance();
+
+renderPersonnelReport();
+
+updateBackupInfo();
+
+
+/* =====================================================
+   MENÜ
+===================================================== */
+
+function showSection(id,button){
+
+document
+.querySelectorAll(".section")
+.forEach(
+section=>{
+section.classList.remove("active");
+section.classList.remove("print-active");
+}
+);
+
+document
+.getElementById(id)
+.classList.add("active");
+
+
+document
+.querySelectorAll(".menu-btn")
+.forEach(
+btn=>{
+btn.classList.remove("active");
+}
+);
+
+if(button){
+button.classList.add("active");
+}
+
+
+if(id==="personelSection"){
+renderPersonnel();
+}
+
+if(id==="puantajSection"){
+populateAttendancePeople();
+renderAttendance();
+}
+
+if(id==="personelRaporSection"){
+renderPersonnelReport();
+}
+
+if(id==="yedekSection"){
+updateBackupInfo();
+}
+
+}
+
+
+/* =====================================================
+   CİRO KAYIT
+===================================================== */
+
+function saveRecord(){
+
+const date =
+document.getElementById("date").value;
+
+const cash =
+Number(
+document.getElementById("cash").value
+) || 0;
+
+const card =
+Number(
+document.getElementById("card").value
+) || 0;
+
+const expense =
+Number(
+document.getElementById("expense").value
+) || 0;
+
+const expenseDescription =
+document.getElementById(
+"expenseDescription"
+).value.trim();
+
+const description =
+document.getElementById(
+"description"
+).value.trim();
+
+
+if(!date){
+
+alert("Lütfen tarih seçin.");
+
+return;
+
+}
+
+
+if(
+cash===0 &&
+card===0 &&
+expense===0
+){
+
+alert(
+"Nakit, kredi kartı veya gider alanlarından en az birini doldurun."
+);
+
+return;
+
+}
+
+
+if(editingId){
+
+const record =
+records.find(
+x=>x.id===editingId
+);
+
+if(record){
+
+record.date=date;
+record.cash=cash;
+record.card=card;
+record.expense=expense;
+record.expenseDescription=expenseDescription;
+record.description=description;
+
+}
+
+editingId=null;
+
+}else{
+
+records.push({
+
+id:Date.now(),
+
+date:date,
+
+cash:cash,
+
+card:card,
+
+expense:expense,
+
+expenseDescription:
+expenseDescription,
+
+description:
+description
+
+});
+
+}
+
+
+saveCiroData();
+
+clearForm();
+
+render();
+
+alert("Bilgiler kaydedildi.");
+
+}
+
+
+/* =====================================================
+   CİRO KAYDET
+===================================================== */
+
+function saveCiroData(){
+
+localStorage.setItem(
+"ISLETME_CIRO_DATA",
+JSON.stringify(records)
+);
+
+}
+
+
+/* =====================================================
+   CİRO FORM TEMİZLE
+===================================================== */
+
+function clearForm(){
+
+document.getElementById("date").value=today();
+
+document.getElementById("cash").value="";
+
+document.getElementById("card").value="";
+
+document.getElementById("expense").value="";
+
+document.getElementById(
+"expenseDescription"
+).value="";
+
+document.getElementById(
+"description"
+).value="";
+
+editingId=null;
+
+}
+
+
+/* =====================================================
+   CİRO FİLTRE
+===================================================== */
+
+function getFiltered(){
+
+let data=[...records];
+
+const month =
+document.getElementById(
+"filterMonth"
+).value;
+
+const start =
+document.getElementById(
+"filterStart"
+).value;
+
+const end =
+document.getElementById(
+"filterEnd"
+).value;
+
+const payment =
+document.getElementById(
+"filterPayment"
+).value;
+
+
+if(month){
+
+data=data.filter(
+r=>r.date.startsWith(month)
+);
+
+}
+
+if(start){
+
+data=data.filter(
+r=>r.date>=start
+);
+
+}
+
+if(end){
+
+data=data.filter(
+r=>r.date<=end
+);
+
+}
+
+if(payment==="cash"){
+
+data=data.filter(
+r=>Number(r.cash)>0
+);
+
+}
+
+if(payment==="card"){
+
+data=data.filter(
+r=>Number(r.card)>0
+);
+
+}
+
+
+return data;
+
+}
+
+
+/* =====================================================
+   CİRO RENDER
+===================================================== */
+
+function render(){
+
+const data=getFiltered();
+
+data.sort(
+(a,b)=>
+b.date.localeCompare(a.date)
+);
+
+
+const table =
+document.getElementById(
+"recordsTable"
+);
+
+
+if(!data.length){
+
+table.innerHTML=`
+
+<tr>
+
+<td
+colspan="9"
+class="empty">
+
+Kayıt bulunamadı.
+
+</td>
+
+</tr>
+
+`;
+
+}else{
+
+table.innerHTML=
+data.map(
+r=>{
+
+const turnover =
+Number(r.cash)+
+Number(r.card);
+
+const net =
+turnover-
+Number(r.expense);
+
+
+return `
+
+<tr>
+
+<td>${formatDate(r.date)}</td>
+
+<td>
+<span class="badge badge-cash">
+${money(r.cash)}
+</span>
+</td>
+
+<td>
+<span class="badge badge-card">
+${money(r.card)}
+</span>
+</td>
+
+<td>
+<strong>${money(turnover)}</strong>
+</td>
+
+<td>
+<span class="badge badge-expense">
+${money(r.expense)}
+</span>
+</td>
+
+<td>
+<strong>${money(net)}</strong>
+</td>
+
+<td>
+${escapeHTML(r.expenseDescription)}
+</td>
+
+<td>
+${escapeHTML(r.description)}
+</td>
+
+<td class="no-print">
+
+<button
+class="btn-blue"
+onclick="editRecord(${r.id})">
+Düzenle
+</button>
+
+<button
+class="btn-red"
+onclick="deleteRecord(${r.id})">
+Sil
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}
+).join("");
+
+}
+
+
+let cashTotal=0;
+let cardTotal=0;
+let turnoverTotal=0;
+let expenseTotal=0;
+
+
+data.forEach(
+r=>{
+
+cashTotal+=Number(r.cash)||0;
+
+cardTotal+=Number(r.card)||0;
+
+turnoverTotal+=
+(Number(r.cash)||0)+
+(Number(r.card)||0);
+
+expenseTotal+=
+Number(r.expense)||0;
+
+});
+
+
+const net=
+turnoverTotal-
+expenseTotal;
+
+
+document.getElementById(
+"monthlyCash"
+).textContent=money(cashTotal);
+
+document.getElementById(
+"monthlyCard"
+).textContent=money(cardTotal);
+
+document.getElementById(
+"monthlyTurnover"
+).textContent=money(turnoverTotal);
+
+document.getElementById(
+"monthlyExpense"
+).textContent=money(expenseTotal);
+
+document.getElementById(
+"monthlyNet"
+).textContent=money(net);
+
+document.getElementById(
+"reportCash"
+).textContent=money(cashTotal);
+
+document.getElementById(
+"reportCard"
+).textContent=money(cardTotal);
+
+document.getElementById(
+"reportTurnover"
+).textContent=money(turnoverTotal);
+
+document.getElementById(
+"reportExpense"
+).textContent=money(expenseTotal);
+
+document.getElementById(
+"reportNet"
+).textContent=money(net);
+
+document.getElementById(
+"reportCount"
+).textContent=data.length;
+
+}
+
+
+/* =====================================================
+   CİRO DÜZENLE
+===================================================== */
+
+function editRecord(id){
+
+const r =
+records.find(
+x=>x.id===id
+);
+
+if(!r)return;
+
+document.getElementById(
+"date"
+).value=r.date;
+
+document.getElementById(
+"cash"
+).value=r.cash;
+
+document.getElementById(
+"card"
+).value=r.card;
+
+document.getElementById(
+"expense"
+).value=r.expense;
+
+document.getElementById(
+"expenseDescription"
+).value=
+r.expenseDescription||"";
+
+document.getElementById(
+"description"
+).value=
+r.description||"";
+
+editingId=id;
+
+showSection(
+"ciroSection",
+document.querySelector(".menu-btn")
+);
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+/* =====================================================
+   CİRO SİL
+===================================================== */
+
+function deleteRecord(id){
+
+if(
+!confirm(
+"Bu ciro kaydını silmek istediğinize emin misiniz?"
+)
+){
+
+return;
+
+}
+
+records=
+records.filter(
+r=>r.id!==id
+);
+
+saveCiroData();
+
+render();
+
+}
+
+
+/* =====================================================
+   CİRO FİLTRE TEMİZLE
+===================================================== */
+
+function clearFilters(){
+
+document.getElementById(
+"filterMonth"
+).value="";
+
+document.getElementById(
+"filterStart"
+).value="";
+
+document.getElementById(
+"filterEnd"
+).value="";
+
+document.getElementById(
+"filterPayment"
+).value="all";
+
+render();
+
+}
+
+
+/* =====================================================
+   TARİH FORMAT
+===================================================== */
+
+function formatDate(date){
+
+if(!date)return "";
+
+const parts=date.split("-");
+
+return `${parts[2]}.${parts[1]}.${parts[0]}`;
+
+}
+
+
+/* =====================================================
+   CSV
+===================================================== */
+
+function exportCSV(){
+
+const data=getFiltered();
+
+if(!data.length){
+
+alert(
+"Çıktı alınacak kayıt yok."
+);
+
+return;
+
+}
+
+
+let csv=
+"Tarih;Nakit;Kredi Kartı;Toplam Ciro;Gider;Net;Gider Açıklaması;Açıklama\n";
+
+
+data.forEach(
+r=>{
+
+const turnover=
+Number(r.cash)+
+Number(r.card);
+
+const net=
+turnover-
+Number(r.expense);
+
+
+csv+=
+[
+r.date,
+r.cash,
+r.card,
+turnover,
+r.expense,
+net,
+r.expenseDescription,
+r.description
+]
+.map(
+v=>
+`"${String(v||"")
+.replaceAll('"','""')}"`
+)
+.join(";")
++"\n";
+
+});
+
+
+const blob=
+new Blob(
+["\ufeff"+csv],
+{
+type:"text/csv;charset=utf-8;"
+}
+);
+
+
+const url=
+URL.createObjectURL(blob);
+
+const a=
+document.createElement("a");
+
+a.href=url;
+
+a.download="ciro-raporu.csv";
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+
+
+/* =====================================================
+   PERSONEL KAYDET
+===================================================== */
+
+function savePerson(){
+
+const name=
+document.getElementById(
+"personName"
+).value.trim();
+
+const role=
+document.getElementById(
+"personRole"
+).value.trim();
+
+const startDate=
+document.getElementById(
+"personStartDate"
+).value;
+
+const active=
+document.getElementById(
+"personActive"
+).value==="true";
+
+
+if(!name){
+
+alert("Personel adı girin.");
+
+return;
+
+}
+
+
+if(editingPersonId){
+
+const person=
+personnel.find(
+p=>p.id===editingPersonId
+);
+
+if(person){
+
+person.name=name;
+person.role=role;
+person.startDate=startDate;
+person.active=active;
+
+}
+
+editingPersonId=null;
+
+}else{
+
+personnel.push({
+
+id:Date.now(),
+
+name:name,
+
+role:role,
+
+startDate:startDate,
+
+active:active
+
+});
+
+}
+
+
+savePersonnelData();
+
+clearPersonForm();
+
+renderPersonnel();
+
+populateAttendancePeople();
+
+alert("Personel kaydedildi.");
+
+}
+
+
+/* =====================================================
+   PERSONEL KAYDET
+===================================================== */
+
+function savePersonnelData(){
+
+localStorage.setItem(
+"ISLETME_PERSONEL_DATA",
+JSON.stringify(personnel)
+);
+
+}
+
+
+/* =====================================================
+   PERSONEL FORM TEMİZLE
+===================================================== */
+
+function clearPersonForm(){
+
+document.getElementById(
+"personName"
+).value="";
+
+document.getElementById(
+"personRole"
+).value="";
+
+document.getElementById(
+"personStartDate"
+).value=today();
+
+document.getElementById(
+"personActive"
+).value="true";
+
+editingPersonId=null;
+
+}
+
+
+/* =====================================================
+   PERSONEL RENDER
+===================================================== */
+
+function renderPersonnel(){
+
+const table=
+document.getElementById(
+"personnelTable"
+);
+
+const cards=
+document.getElementById(
+"personnelCards"
+);
+
+
+if(!personnel.length){
+
+table.innerHTML=`
+
+<tr>
+
+<td
+colspan="5"
+class="empty">
+
+Henüz personel eklenmedi.
+
+</td>
+
+</tr>
+
+`;
+
+cards.innerHTML="";
+
+return;
+
+}
+
+
+table.innerHTML=
+personnel.map(
+p=>`
+
+<tr>
+
+<td>
+<strong>
+${escapeHTML(p.name)}
+</strong>
+</td>
+
+<td>
+${escapeHTML(p.role||"-")}
+</td>
+
+<td>
+${p.startDate?
+formatDate(p.startDate):
+"-"}
+</td>
+
+<td>
+
+<span class="badge ${
+p.active?
+"badge-cash":
+"badge-expense"
+}">
+
+${p.active?"AKTİF":"PASİF"}
+
+</span>
+
+</td>
+
+<td class="no-print">
+
+<button
+class="btn-blue"
+onclick="editPerson(${p.id})">
+Düzenle
+</button>
+
+<button
+class="btn-red"
+onclick="deletePerson(${p.id})">
+Sil
+</button>
+
+</td>
+
+</tr>
+
+`
+).join("");
+
+
+const activePersonnel=
+personnel.filter(
+p=>p.active
+);
+
+
+cards.innerHTML=
+activePersonnel.map(
+p=>`
+
+<div class="person-card">
+
+<div class="person-name">
+👤 ${escapeHTML(p.name)}
+</div>
+
+<div class="person-role">
+${escapeHTML(p.role||"Görev belirtilmedi")}
+</div>
+
+<div class="person-status"
+style="color:#16a34a">
+
+● AKTİF PERSONEL
+
+</div>
+
+</div>
+
+`
+).join("");
+
+}
+
+
+/* =====================================================
+   PERSONEL DÜZENLE
+===================================================== */
+
+function editPerson(id){
+
+const p=
+personnel.find(
+x=>x.id===id
+);
+
+if(!p)return;
+
+document.getElementById(
+"personName"
+).value=p.name;
+
+document.getElementById(
+"personRole"
+).value=p.role||"";
+
+document.getElementById(
+"personStartDate"
+).value=p.startDate||"";
+
+document.getElementById(
+"personActive"
+).value=
+p.active?
+"true":
+"false";
+
+editingPersonId=id;
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+/* =====================================================
+   PERSONEL SİL
+===================================================== */
+
+function deletePerson(id){
+
+const p=
+personnel.find(
+x=>x.id===id
+);
+
+if(!p)return;
+
+
+if(
+!confirm(
+`${p.name} personelini silmek istediğinize emin misiniz?\n\nBu işlem personel listesinden kaldırır.`
+)
+){
+
+return;
+
+}
+
+
+personnel=
+personnel.filter(
+x=>x.id!==id
+);
+
+savePersonnelData();
+
+renderPersonnel();
+
+populateAttendancePeople();
+
+}
+
+
+/* =====================================================
+   PUANTAJ PERSONELLERİ
+===================================================== */
+
+function populateAttendancePeople(){
+
+const select=
+document.getElementById(
+"attendancePerson"
+);
+
+const current=
+select.value;
+
+
+select.innerHTML=
+personnel
+.filter(p=>p.active)
+.map(
+p=>
+`<option value="${p.id}">
+${escapeHTML(p.name)}
+</option>`
+)
+.join("");
+
+
+if(current &&
+personnel.some(
+p=>p.active &&
+String(p.id)===String(current)
+)
+){
+
+select.value=current;
+
+}
+
+}
+
+
+/* =====================================================
+   AY GÜN SAYISI
+===================================================== */
+
+function daysInMonth(month){
+
+if(!month)return 0;
+
+const parts=month.split("-");
+
+const year=Number(parts[0]);
+
+const m=Number(parts[1]);
+
+return new Date(
+year,
+m,
+0
+).getDate();
+
+}
+
+
+/* =====================================================
+   TARİH OLUŞTUR
+===================================================== */
+
+function makeDate(month,day){
+
+return month+
+"-"+
+String(day).padStart(2,"0");
+
+}
+
+
+/* =====================================================
+   PUANTAJ ANAHTARI
+===================================================== */
+
+function attendanceKey(
+personId,
+month,
+day
+){
+
+return `${personId}_${month}_${day}`;
+
+}
+
+
+/* =====================================================
+   DURUM METNİ
+===================================================== */
+
+function statusText(status){
+
+if(status==="work"){
+return "Çalıştı";
+}
+
+if(status==="leave"){
+return "İzin";
+}
+
+if(status==="report"){
+return "Rapor";
+}
+
+if(status==="absent"){
+return "Gelmedi";
+}
+
+return "Boş";
+
+}
+
+
+/* =====================================================
+   PUANTAJ RENDER
+===================================================== */
+
+function renderAttendance(){
+
+const month=
+document.getElementById(
+"attendanceMonth"
+).value;
+
+const personId=
+document.getElementById(
+"attendancePerson"
+).value;
+
+
+const head=
+document.getElementById(
+"attendanceHead"
+);
+
+const body=
+document.getElementById(
+"attendanceBody"
+);
+
+const title=
+document.getElementById(
+"attendancePersonTitle"
+);
+
+
+if(!month || !personId){
+
+head.innerHTML="";
+
+body.innerHTML=
+`<tr><td class="empty">
+Personel seçin.
+</td></tr>`;
+
+return;
+
+}
+
+
+const person=
+personnel.find(
+p=>String(p.id)===String(personId)
+);
+
+
+if(!person){
+
+return;
+
+}
+
+
+title.innerHTML=
+`<strong>${escapeHTML(person.name)}</strong> • ${escapeHTML(person.role||"")}`;
+
+
+const days=
+daysInMonth(month);
+
+
+let headHTML=
+"<tr><th>Personel</th>";
+
+for(let day=1;day<=days;day++){
+
+const date=
+new Date(
+Number(month.substring(0,4)),
+Number(month.substring(5,7))-1,
+day
+);
+
+const weekday=
+date.getDay();
+
+const weekend=
+weekday===0 ||
+weekday===6;
+
+headHTML+=`
+
+<th
+class="${weekend?"weekend":""}">
+
+${day}<br>
+<span style="font-size:10px">
+${weekdayName(weekday)}
+</span>
+
+</th>
+
+`;
+
+}
+
+headHTML+="</tr>";
+
+head.innerHTML=headHTML;
+
+
+let bodyHTML=
+`<tr>
+
+<td>
+
+<strong>
+${escapeHTML(person.name)}
+</strong>
+
+</td>`;
+
+
+for(let day=1;day<=days;day++){
+
+const key=
+attendanceKey(
+personId,
+month,
+day
+);
+
+const status=
+attendance[key]||"";
+
+const date=
+new Date(
+Number(month.substring(0,4)),
+Number(month.substring(5,7))-1,
+day
+);
+
+const weekend=
+date.getDay()===0 ||
+date.getDay()===6;
+
+
+bodyHTML+=`
+
+<td
+class="${weekend?"weekend":""}">
+
+<button
+
+class="day-button
+${statusClass(status)}"
+
+onclick="cycleAttendance('${key}')"
+
+title="${statusText(status)}">
+
+${statusShort(status)}
+
+</button>
+
+</td>
+
+`;
+
+}
+
+
+bodyHTML+="</tr>";
+
+body.innerHTML=bodyHTML;
+
+renderAttendanceSummary(
+personId,
+month
+);
+
+}
+
+
+/* =====================================================
+   HAFTA GÜNÜ
+===================================================== */
+
+function weekdayName(day){
+
+const names=[
+"Paz",
+"Pzt",
+"Sal",
+"Çar",
+"Per",
+"Cuma",
+"Cts"
+];
+
+return names[day];
+
+}
+
+
+/* =====================================================
+   DURUM CLASS
+===================================================== */
+
+function statusClass(status){
+
+if(status==="work"){
+return "status-work";
+}
+
+if(status==="leave"){
+return "status-leave";
+}
+
+if(status==="report"){
+return "status-report";
+}
+
+if(status==="absent"){
+return "status-absent";
+}
+
+return "status-empty";
+
+}
+
+
+/* =====================================================
+   DURUM KISA
+===================================================== */
+
+function statusShort(status){
+
+if(status==="work"){
+return "Ç";
+}
+
+if(status==="leave"){
+return "İ";
+}
+
+if(status==="report"){
+return "R";
+}
+
+if(status==="absent"){
+return "G";
+}
+
+return "+";
+
+}
+
+
+/* =====================================================
+   DURUM DEĞİŞTİR
+===================================================== */
+
+function cycleAttendance(key){
+
+const order=[
+"",
+"work",
+"leave",
+"report",
+"absent"
+];
+
+const current=
+attendance[key]||"";
+
+const index=
+order.indexOf(current);
+
+const next=
+order[
+(index+1)%
+order.length
+];
+
+
+if(next===""){
+
+delete attendance[key];
+
+}else{
+
+attendance[key]=next;
+
+}
+
+
+saveAttendanceData();
+
+renderAttendance();
+
+updateBackupInfo();
+
+}
+
+
+/* =====================================================
+   PUANTAJ KAYDET
+===================================================== */
+
+function saveAttendanceData(){
+
+localStorage.setItem(
+"ISLETME_PUANTAJ_DATA",
+JSON.stringify(attendance)
+);
+
+}
+
+
+/* =====================================================
+   TÜM AYI DURUM YAP
+===================================================== */
+
+function setAllAttendance(status){
+
+const month=
+document.getElementById(
+"attendanceMonth"
+).value;
+
+const personId=
+document.getElementById(
+"attendancePerson"
+).value;
+
+
+if(!month || !personId){
+
+alert(
+"Önce ay ve personel seçin."
+);
+
+return;
+
+}
+
+
+const text=
+statusText(status);
+
+
+if(
+!confirm(
+`Seçili ayın tüm günleri "${text}" olarak işaretlensin mi?`
+)
+){
+
+return;
+
+}
+
+
+const days=
+daysInMonth(month);
+
+
+for(let day=1;day<=days;day++){
+
+const key=
+attendanceKey(
+personId,
+month,
+day
+);
+
+attendance[key]=status;
+
+}
+
+
+saveAttendanceData();
+
+renderAttendance();
+
+updateBackupInfo();
+
+}
+
+
+/* =====================================================
+   HAFTA SONLARINI TOPLU DURUM
+===================================================== */
+
+function setWeekends(status){
+
+const month=
+document.getElementById(
+"attendanceMonth"
+).value;
+
+const personId=
+document.getElementById(
+"attendancePerson"
+).value;
+
+
+if(!month || !personId){
+
+alert(
+"Önce ay ve personel seçin."
+);
+
+return;
+
+}
+
+
+if(
+!confirm(
+"Seçili aydaki tüm Cumartesi ve Pazar günleri izin olarak işaretlensin mi?"
+)
+){
+
+return;
+
+}
+
+
+const days=
+daysInMonth(month);
+
+
+for(let day=1;day<=days;day++){
+
+const date=
+new Date(
+Number(month.substring(0,4)),
+Number(month.substring(5,7))-1,
+day
+);
+
+if(
+date.getDay()===0 ||
+date.getDay()===6
+){
+
+const key=
+attendanceKey(
+personId,
+month,
+day
+);
+
+attendance[key]=status;
+
+}
+
+}
+
+
+saveAttendanceData();
+
+renderAttendance();
+
+updateBackupInfo();
+
+}
+
+
+/* =====================================================
+   PUANTAJ AY TEMİZLE
+===================================================== */
+
+function clearAttendanceMonth(){
+
+const month=
+document.getElementById(
+"attendanceMonth"
+).value;
+
+const personId=
+document.getElementById(
+"attendancePerson"
+).value;
+
+
+if(!month || !personId){
+
+return;
+
+}
+
+
+if(
+!confirm(
+"Bu personelin seçili aydaki tüm puantaj kayıtları silinsin mi?"
+)
+){
+
+return;
+
+}
+
+
+const days=
+daysInMonth(month);
+
+
+for(let day=1;day<=days;day++){
+
+const key=
+attendanceKey(
+personId,
+month,
+day
+);
+
+delete attendance[key];
+
+}
+
+
+saveAttendanceData();
+
+renderAttendance();
+
+updateBackupInfo();
+
+}
+
+
+/* =====================================================
+   PUANTAJ ÖZET
+===================================================== */
+
+function renderAttendanceSummary(
+personId,
+month
+){
+
+const box=
+document.getElementById(
+"attendanceSummary"
+);
+
+
+const days=
+daysInMonth(month);
+
+
+let work=0;
+let leave=0;
+let report=0;
+let absent=0;
+
+
+for(let day=1;day<=days;day++){
+
+const key=
+attendanceKey(
+personId,
+month,
+day
+);
+
+const status=
+attendance[key];
+
+
+if(status==="work"){
+work++;
+}
+
+if(status==="leave"){
+leave++;
+}
+
+if(status==="report"){
+report++;
+}
+
+if(status==="absent"){
+absent++;
+}
+
+}
+
+
+const total=
+work+
+leave+
+report+
+absent;
+
+
+box.innerHTML=`
+
+<div class="summary-mini">
+
+ÇALIŞTI
+
+<strong style="color:#16a34a">
+${work}
+</strong>
+
+gün
+
+</div>
+
+
+<div class="summary-mini">
+
+İZİN
+
+<strong style="color:#ea580c">
+${leave}
+</strong>
+
+gün
+
+</div>
+
+
+<div class="summary-mini">
+
+RAPOR
+
+<strong style="color:#2563eb">
+${report}
+</strong>
+
+gün
+
+</div>
+
+
+<div class="summary-mini">
+
+GELMEDİ
+
+<strong style="color:#dc2626">
+${absent}
+</strong>
+
+gün
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   PERSONEL RAPORU
+===================================================== */
+
+function renderPersonnelReport(){
+
+const month=
+document.getElementById(
+"reportMonth"
+).value;
+
+
+const table=
+document.getElementById(
+"personnelReportTable"
+);
+
+const title=
+document.getElementById(
+"personnelReportTitle"
+);
+
+
+if(!month){
+
+table.innerHTML=
+`<tr><td class="empty">
+Ay seçin.
+</td></tr>`;
+
+return;
+
+}
+
+
+title.textContent=
+`📈 ${month.substring(5,7)}.${month.substring(0,4)} Personel Raporu`;
+
+
+const days=
+daysInMonth(month);
+
+
+const active=
+personnel.filter(
+p=>p.active
+);
+
+
+if(!active.length){
+
+table.innerHTML=
+`<tr>
+
+<td
+colspan="7"
+class="empty">
+
+Aktif personel bulunmuyor.
+
+</td>
+
+</tr>`;
+
+return;
+
+}
+
+
+table.innerHTML=
+active.map(
+p=>{
+
+let work=0;
+let leave=0;
+let report=0;
+let absent=0;
+
+
+for(let day=1;day<=days;day++){
+
+const key=
+attendanceKey(
+p.id,
+month,
+day
+);
+
+const status=
+attendance[key];
+
+
+if(status==="work")work++;
+
+if(status==="leave")leave++;
+
+if(status==="report")report++;
+
+if(status==="absent")absent++;
+
+}
+
+
+const total=
+work+
+leave+
+report+
+absent;
+
+
+return `
+
+<tr>
+
+<td>
+<strong>
+${escapeHTML(p.name)}
+</strong>
+</td>
+
+<td>
+${escapeHTML(p.role||"-")}
+</td>
+
+<td>
+<span class="badge badge-cash">
+${work}
+</span>
+</td>
+
+<td>
+<span
+class="badge"
+style="background:#fef3c7;color:#92400e">
+${leave}
+</span>
+</td>
+
+<td>
+<span
+class="badge badge-card">
+${report}
+</span>
+</td>
+
+<td>
+<span class="badge badge-expense">
+${absent}
+</span>
+</td>
+
+<td>
+<strong>
+${total} / ${days}
+</strong>
+</td>
+
+</tr>
+
+`;
+
+}
+).join("");
+
+}
+
+
+/* =====================================================
+   YEDEK AL
+===================================================== */
+
+function backupAllData(){
+
+const backup={
+
+version:1,
+
+createdAt:
+new Date().toISOString(),
+
+ciro:records,
+
+personnel:personnel,
+
+attendance:attendance
+
+};
+
+
+const json=
+JSON.stringify(
+backup,
+null,
+2
+);
+
+
+const blob=
+new Blob(
+[json],
+{
+type:"application/json"
+}
+);
+
+
+const url=
+URL.createObjectURL(blob);
+
+
+const a=
+document.createElement("a");
+
+a.href=url;
+
+a.download=
+`isletme-yedek-${today()}.json`;
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+
+alert(
+"Yedek dosyası oluşturuldu."
+);
+
+}
+
+
+/* =====================================================
+   YEDEK GERİ YÜKLE
+===================================================== */
+
+function restoreBackup(event){
+
+const file=
+event.target.files[0];
+
+
+if(!file){
+
+return;
+
+}
+
+
+const reader=
+new FileReader();
+
+
+reader.onload=function(e){
+
+try{
+
+const data=
+JSON.parse(e.target.result);
+
+
+if(
+!data ||
+typeof data!=="object"
+){
+
+throw new Error();
+
+}
+
+
+/*
+   CİRO
+*/
+
+if(
+Array.isArray(data.ciro)
+){
+
+records=data.ciro;
+
+saveCiroData();
+
+}
+
+
+/*
+   PERSONEL
+*/
+
+if(
+Array.isArray(data.personnel)
+){
+
+personnel=data.personnel;
+
+savePersonnelData();
+
+}
+
+
+/*
+   PUANTAJ
+*/
+
+if(
+data.attendance &&
+typeof data.attendance==="object"
+){
+
+attendance=data.attendance;
+
+saveAttendanceData();
+
+}
+
+
+render();
+
+renderPersonnel();
+
+populateAttendancePeople();
+
+renderAttendance();
+
+renderPersonnelReport();
+
+updateBackupInfo();
+
+
+alert(
+"Yedek başarıyla geri yüklendi."
+);
+
+
+}catch(error){
+
+alert(
+"Yedek dosyası geçersiz veya bozuk."
+);
+
+}
+
+
+event.target.value="";
+
+};
+
+
+reader.readAsText(file);
+
+}
+
+
+/* =====================================================
+   YEDEK BİLGİSİ
+===================================================== */
+
+function updateBackupInfo(){
+
+const ciroCount=
+document.getElementById(
+"backupCiroCount"
+);
+
+const personCount=
+document.getElementById(
+"backupPersonCount"
+);
+
+const attendanceCount=
+document.getElementById(
+"backupAttendanceCount"
+);
+
+
+if(ciroCount){
+
+ciroCount.textContent=
+records.length;
+
+}
+
+if(personCount){
+
+personCount.textContent=
+personnel.length;
+
+}
+
+if(attendanceCount){
+
+attendanceCount.textContent=
+Object.keys(attendance).length;
+
+}
+
+}
+
+
+/* =====================================================
+   YAZDIR
+===================================================== */
+
+function printCurrentSection(){
+
+const active=
+document.querySelector(
+".section.active"
+);
+
+
+if(!active){
+
+return;
+
+}
+
+
+document
+.querySelectorAll(".section")
+.forEach(
+s=>{
+s.classList.remove("print-active");
+}
+);
+
+
+active.classList.add(
+"print-active"
+);
+
+
+window.print();
+
+}
+
+
+/* =====================================================
+   CİRO RAPOR YAZDIR
+===================================================== */
+
+function printReport(){
+
+showSection(
+"ciroSection",
+document.querySelector(".menu-btn")
+);
+
+setTimeout(
+()=>{
+window.print();
+},
+100
+);
+
+}
+
+
+/* =====================================================
+   PERSONEL RAPOR YAZDIR
+===================================================== */
+
+function printPersonnelReport(){
+
+const section=
+document.getElementById(
+"personelRaporSection"
+);
+
+
+document
+.querySelectorAll(".section")
+.forEach(
+s=>{
+s.classList.remove("print-active");
+}
+);
+
+
+section.classList.add(
+"print-active"
+);
+
+
+window.print();
+
+}
+
+
+/* =====================================================
+   GÜVENLİ METİN
+===================================================== */
+
+function escapeHTML(value){
+
+return String(value ?? "")
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+
+}
+
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
