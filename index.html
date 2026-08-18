@@ -4373,6 +4373,254 @@ window.addEventListener("load", function () {
     };
 
 });
+</script><script>
+async function initialCloudSync(){
+
+    if(!cloudUser || cloudBusy) return;
+
+    cloudBusy = true;
+
+    try{
+
+        const [c,p,a] = await Promise.all([
+
+            cloud.from("ciro")
+                .select("*")
+                .order("tarih",{ascending:false}),
+
+            cloud.from("personel")
+                .select("*")
+                .order("created_at",{ascending:true}),
+
+            cloud.from("puantaj")
+                .select("*")
+                .order("tarih",{ascending:true})
+
+        ]);
+
+        if(c.error) throw c.error;
+        if(p.error) throw p.error;
+        if(a.error) throw a.error;
+
+
+        /* =========================================
+           CİRO
+           BİLGİSAYAR + TELEFON = BİRLEŞTİR
+        ========================================= */
+
+        records = records.map(r => ({
+            ...r,
+            id: ensureUUID(r.id)
+        }));
+
+        const ciroMap = new Map();
+
+        /* Önce bilgisayardaki kayıtlar */
+        records.forEach(r => {
+            ciroMap.set(String(r.id), r);
+        });
+
+        /* Sonra buluttaki kayıtlar */
+        (c.data || []).forEach(r => {
+
+            if(!ciroMap.has(String(r.id))){
+
+                ciroMap.set(String(r.id),{
+
+                    id:r.id,
+                    date:r.tarih,
+                    cash:Number(r.nakit)||0,
+                    card:Number(r.kart)||0,
+                    expense:Number(r.gider)||0,
+                    expenseDescription:r.gider_aciklama||"",
+                    description:r.aciklama||""
+
+                });
+
+            }
+
+        });
+
+        records = Array.from(ciroMap.values());
+
+
+        /* =========================================
+           PERSONEL
+        ========================================= */
+
+        const eskiYeniID = {};
+
+        personnel = personnel.map(p => {
+
+            const eskiID = String(p.id);
+            const yeniID = ensureUUID(p.id);
+
+            eskiYeniID[eskiID] = yeniID;
+
+            return {
+                ...p,
+                id:yeniID
+            };
+
+        });
+
+
+        /* =========================================
+           PUANTAJ ESKİ PERSONEL ID'LERİNİ DÜZELT
+        ========================================= */
+
+        const yeniPuantaj = {};
+
+        Object.entries(attendance).forEach(([key,status]) => {
+
+            const parcalar = key.split("_");
+
+            const eskiID = parcalar[0];
+
+            const yeniID =
+                eskiYeniID[eskiID] || eskiID;
+
+            const yeniKey =
+                key.replace(
+                    eskiID+"_",
+                    yeniID+"_"
+                );
+
+            yeniPuantaj[yeniKey] = status;
+
+        });
+
+        attendance = yeniPuantaj;
+
+
+        /* =========================================
+           BULUT PERSONELLERİNİ EKLE
+        ========================================= */
+
+        const personelMap = new Map();
+
+        personnel.forEach(p => {
+
+            personelMap.set(
+                String(p.id),
+                p
+            );
+
+        });
+
+
+        (p.data || []).forEach(p => {
+
+            if(!personelMap.has(String(p.id))){
+
+                personelMap.set(
+                    String(p.id),
+                    {
+                        id:p.id,
+                        name:p.ad_soyad,
+                        role:p.gorev || "",
+                        startDate:p.baslangic_tarihi || "",
+                        active:!!p.aktif
+                    }
+                );
+
+            }
+
+        });
+
+
+        personnel =
+            Array.from(personelMap.values());
+
+
+        /* =========================================
+           BULUT PUANTAJLARINI EKLE
+        ========================================= */
+
+        (a.data || []).forEach(r => {
+
+            const d =
+                new Date(
+                    r.tarih+"T00:00:00"
+                );
+
+            const month =
+                r.tarih.substring(0,7);
+
+            const day =
+                d.getDate();
+
+            const key =
+                attendanceKey(
+                    r.personel_id,
+                    month,
+                    day
+                );
+
+            if(!attendance[key]){
+
+                attendance[key] =
+                    r.durum;
+
+            }
+
+        });
+
+
+        /* =========================================
+           BİRLEŞMİŞ VERİLERİ BULUTA GÖNDER
+        ========================================= */
+
+        await syncCiroToCloud();
+
+        await syncPersonnelToCloud();
+
+        await syncAttendanceToCloud();
+
+
+        /* =========================================
+           YEREL EKRANI GÜNCELLE
+        ========================================= */
+
+        saveLocalAll();
+
+        render();
+
+        renderPersonnel();
+
+        populateAttendancePeople();
+
+        renderAttendance();
+
+        renderPersonnelReport();
+
+        updateBackupInfo();
+
+        cloudMessage(
+            "☁️ Bilgisayar + Telefon verileri birleştirildi"
+        );
+
+
+    }catch(e){
+
+        console.error(e);
+
+        cloudMessage(
+            "☁️ Senkronizasyon hatası"
+        );
+
+        alert(
+            "Senkronizasyon sırasında hata oluştu: "
+            +(e.message || e)
+        );
+
+    }finally{
+
+        cloudBusy = false;
+
+    }
+
+}
 </script>
 </body>
 </html>
