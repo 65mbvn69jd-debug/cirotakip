@@ -4494,16 +4494,45 @@ window.addEventListener("load", function () {
 
     document.getElementById("logoutButton").onclick = async function () {
 
-        if (!confirm("Çıkış yapmak istediğinize emin misiniz?")) {
-            return;
+    if (!confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+        return;
+    }
+
+    try {
+
+        cloudMessage("🚪 Çıkış yapılıyor...");
+
+        const { error } = await cloud.auth.signOut({
+            scope: "local"
+        });
+
+        if (error) {
+            throw error;
         }
 
-        await cloud.auth.signOut();
+        cloudUser = null;
 
-        
+        const accountPanel =
+            document.getElementById("accountPanel");
+
+        if (accountPanel) {
+            accountPanel.remove();
+        }
+
         location.reload();
 
-    };
+    } catch (error) {
+
+        console.error("Çıkış hatası:", error);
+
+        alert(
+            "Çıkış yapılamadı.\n\n" +
+            (error.message || "Bilinmeyen hata")
+        );
+
+    }
+
+};
 
     document.getElementById("syncNowButton").onclick = async function () {
 
