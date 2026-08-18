@@ -1721,7 +1721,173 @@ updateBackupInfo();
    CİRO KAYIT
 ===================================================== */
 
-function saveRecord(){
+async function saveRecord(){
+
+    const date =
+        document.getElementById("date").value;
+
+    const cash =
+        Number(
+            document.getElementById("cash").value
+        ) || 0;
+
+    const card =
+        Number(
+            document.getElementById("card").value
+        ) || 0;
+
+    const expense =
+        Number(
+            document.getElementById("expense").value
+        ) || 0;
+
+    const expenseDescription =
+        document.getElementById(
+            "expenseDescription"
+        ).value.trim();
+
+    const description =
+        document.getElementById(
+            "description"
+        ).value.trim();
+
+
+    if(!date){
+
+        alert("Lütfen tarih seçin.");
+
+        return;
+
+    }
+
+
+    if(
+        cash===0 &&
+        card===0 &&
+        expense===0
+    ){
+
+        alert(
+            "Nakit, kredi kartı veya gider alanlarından en az birini doldurun."
+        );
+
+        return;
+
+    }
+
+
+    /* ==============================
+       KAYDI OLUŞTUR / GÜNCELLE
+    ============================== */
+
+    if(editingId){
+
+        const record =
+            records.find(
+                x=>x.id===editingId
+            );
+
+        if(record){
+
+            record.date=date;
+            record.cash=cash;
+            record.card=card;
+            record.expense=expense;
+            record.expenseDescription=
+                expenseDescription;
+            record.description=
+                description;
+
+        }
+
+        editingId=null;
+
+    }else{
+
+        records.push({
+
+            id:Date.now(),
+
+            date:date,
+
+            cash:cash,
+
+            card:card,
+
+            expense:expense,
+
+            expenseDescription:
+                expenseDescription,
+
+            description:
+                description
+
+        });
+
+    }
+
+
+    /* ==============================
+       ÖNCE TELEFONA KAYDET
+    ============================== */
+
+    saveCiroData();
+
+    render();
+
+
+    /* ==============================
+       SONRA BULUTA KAYDET
+    ============================== */
+
+    if(cloudUser){
+
+        try{
+
+            cloudMessage(
+                "☁️ Ciro buluta kaydediliyor..."
+            );
+
+            await syncCiroToCloud();
+
+            cloudMessage(
+                "☁️ Ciro buluta kaydedildi"
+            );
+
+        }catch(error){
+
+            console.error(
+                "Ciro bulut kayıt hatası:",
+                error
+            );
+
+            cloudMessage(
+                "⚠️ Buluta kayıt başarısız"
+            );
+
+            alert(
+                "Ciro telefona kaydedildi fakat buluta gönderilemedi.\n\n"+
+                "İnternet bağlantınızı kontrol edin."
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    clearForm();
+
+    render();
+
+    updateBackupInfo();
+
+    alert(
+        "Bilgiler başarıyla kaydedildi."
+    );
+
+}
 
 const date =
 document.getElementById("date").value;
