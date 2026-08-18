@@ -4818,6 +4818,62 @@ async function initialCloudSync(){
 }
 </script>
 <script src="./cloud-fix.js"></script>
+<script>
+window.addEventListener("load", function () {
 
+    setTimeout(function () {
+
+        const logoutButton = document.getElementById("logoutButton");
+
+        if (!logoutButton) return;
+
+        logoutButton.onclick = async function () {
+
+            if (!confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+                return;
+            }
+
+            try {
+
+                logoutButton.disabled = true;
+                logoutButton.textContent = "🚪 Çıkış yapılıyor...";
+
+                try {
+                    await cloud.auth.signOut();
+                } catch (e) {
+                    console.log("Supabase çıkış:", e);
+                }
+
+                cloudUser = null;
+
+                try {
+                    sessionStorage.clear();
+                } catch (e) {}
+
+                try {
+                    localStorage.removeItem(
+                        "sb-yzzoiuwlcccvezgqdetg-auth-token"
+                    );
+                } catch (e) {}
+
+                window.location.href =
+                    window.location.pathname +
+                    "?logout=" +
+                    Date.now();
+
+            } catch (e) {
+
+                console.error(e);
+
+                window.location.reload();
+
+            }
+
+        };
+
+    }, 1000);
+
+});
+</script>
 </body>
 </html>
