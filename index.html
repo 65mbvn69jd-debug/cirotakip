@@ -3976,12 +3976,12 @@ return String(value ?? "")
 const SUPABASE_URL = "https://yzzoiuwlcccvezgqdetg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HHo8C9Hi91DgTiRPDK-ZhA_Ac88ijz5";
 
-const cloud = window.supabase.createClient(
+cloud = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
 
-let cloudUser = null;
+cloudUser = null;
 let cloudBusy = false;
 
 function isUUID(value){
